@@ -1,0 +1,91 @@
+{
+  "total": 3,
+  "totalPages": 1,
+  "page": 1,
+  "results": [
+    {
+      "id": "d1e2f3a4-0001-4b5c-8d9e-000000000001",
+      "itemId": "item-sandbox-001",
+      "type": "FIXED_INCOME",
+      "subtype": "CDB",
+      "name": "CDB Banco Exemplo 2027",
+      "number": null,
+      "balance": 8500,
+      "quantity": null,
+      "value": null,
+      "amount": 7855,
+      "amountOriginal": 7855,
+      "amountProfit": 645,
+      "taxes": 0,
+      "rate": 102,
+      "rateType": "CDI",
+      "fixedAnnualRate": 10.5,
+      "lastMonthRate": 0.9,
+      "lastTwelveMonthsRate": 11.2,
+      "dueDate": "2027-06-15T00:00:00.000Z",
+      "issuer": "Banco Exemplo S.A.",
+      "issuerCNPJ": "33.333.333/0001-33",
+      "status": "ACTIVE",
+      "institution": {
+        "name": "BANCO EXEMPLO S.A.",
+        "number": "33333333000133"
+      }
+    },
+    {
+      "id": "d1e2f3a4-0002-4b5c-8d9e-000000000002",
+      "itemId": "item-sandbox-001",
+      "type": "FIXED_INCOME",
+      "subtype": "TREASURY",
+      "name": "Tesouro Selic 2029",
+      "number": null,
+      "balance": 5200,
+      "quantity": 1,
+      "value": 5200,
+      "amount": 4818,
+      "amountOriginal": 4818,
+      "amountProfit": 382,
+      "taxes": 0,
+      "rate": 11.65,
+      "rateType": "SELIC",
+      "fixedAnnualRate": 11.65,
+      "lastMonthRate": 0.85,
+      "lastTwelveMonthsRate": 11.65,
+      "dueDate": "2029-03-01T00:00:00.000Z",
+      "issuer": "Tesouro Nacional",
+      "issuerCNPJ": null,
+      "status": "ACTIVE",
+      "institution": {
+        "name": "TESOURO NACIONAL",
+        "number": "00000000000191"
+      }
+    },
+    {
+      "id": "d1e2f3a4-0003-4b5c-8d9e-000000000003",
+      "itemId": "item-sandbox-001",
+      "type": "MUTUAL_FUND",
+      "subtype": "INVESTMENT_FUND",
+      "name": "Fundo Multimercado Exemplo",
+      "number": null,
+      "balance": 12800,
+      "quantity": 128,
+      "value": 100,
+      "amount": 11840,
+      "amountOriginal": 11840,
+      "amountProfit": 960,
+      "taxes": 0,
+      "rate": 95,
+      "rateType": "CDI",
+      "fixedAnnualRate": null,
+      "lastMonthRate": 1.1,
+      "lastTwelveMonthsRate": 12.4,
+      "dueDate": null,
+      "issuer": "Gestora Exemplo Ltda.",
+      "issuerCNPJ": "55.555.555/0001-55",
+      "status": "ACTIVE",
+      "institution": {
+        "name": "GESTORA EXEMPLO LTDA.",
+        "number": "55555555000155"
+      }
+    }
+  ]
+}

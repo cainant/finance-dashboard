@@ -1,0 +1,75 @@
+{
+  "results": [
+    {
+      "id": "7a1b2c3d-0005-4e5f-8a9b-000000000005",
+      "description": "UBER *UBER TRIP",
+      "descriptionRaw": null,
+      "currencyCode": "BRL",
+      "amount": -32.9,
+      "amountInAccountCurrency": null,
+      "date": "2026-11-09T14:25:00.000Z",
+      "type": "DEBIT",
+      "status": "PENDING",
+      "category": "Transporte",
+      "categoryId": "10000000",
+      "accountId": "b1a2c3d4-0001-4a5b-8c9d-000000000001",
+      "providerCode": "000000000005",
+      "providerId": null,
+      "operationType": null,
+      "operationTypeAdditionalInfo": null,
+      "paymentData": null,
+      "creditCardMetadata": null,
+      "merchant": {
+        "name": "Uber",
+        "businessName": "UBER DO BRASIL TECNOLOGIA LTDA.",
+        "cnpj": "22.222.222/0001-22",
+        "cnae": "4924800",
+        "category": "Transporte"
+      },
+      "order": 1,
+      "createdAt": "2026-11-09T14:26:00.000Z",
+      "updatedAt": "2026-11-09T14:26:00.000Z"
+    },
+    {
+      "id": "7a1b2c3d-0006-4e5f-8a9b-000000000006",
+      "description": "FARMACIA SAO JOAO",
+      "descriptionRaw": null,
+      "currencyCode": "BRL",
+      "amount": 89.9,
+      "amountInAccountCurrency": null,
+      "date": "2026-11-09T18:40:00.000Z",
+      "type": "DEBIT",
+      "status": "PENDING",
+      "category": "Saúde",
+      "categoryId": "08000000",
+      "accountId": "b1a2c3d4-0002-4a5b-8c9d-000000000002",
+      "providerCode": "000000000006",
+      "providerId": null,
+      "operationType": null,
+      "operationTypeAdditionalInfo": null,
+      "paymentData": null,
+      "creditCardMetadata": {
+        "installmentNumber": 1,
+        "totalInstallments": 1,
+        "totalAmount": 89.9,
+        "payeeMCC": 5912,
+        "cardNumber": "8842",
+        "billId": null,
+        "purchaseDate": "2026-11-09T18:40:00.000Z",
+        "billForecastDate": "2026-12",
+        "paymentType": "SINGLE"
+      },
+      "merchant": {
+        "name": "Farmácia São João",
+        "businessName": "FARMACIA SAO JOAO LTDA.",
+        "cnpj": "44.444.444/0001-44",
+        "cnae": "4771701",
+        "category": "Saúde"
+      },
+      "order": 2,
+      "createdAt": "2026-11-09T18:41:00.000Z",
+      "updatedAt": "2026-11-09T18:41:00.000Z"
+    }
+  ],
+  "next": null
+}

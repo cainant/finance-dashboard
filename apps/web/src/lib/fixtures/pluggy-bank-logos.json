@@ -1,0 +1,112 @@
+{
+  "source": "GET https://api.pluggy.ai/connectors?countries=BR&sandbox=false (campo imageUrl)",
+  "fetchedAt": "2026-11-11",
+  "note": "Captura real do catálogo para provar que cada URL de logo de banco existe. O item MeuPluggy (conector 200) e o Pluggy Bank (2) usam connector-icons/sandbox.svg e ficam de fora.",
+  "connectors": [
+    {
+      "connectorId": 611,
+      "name": "Banco do Brasil",
+      "imageUrl": "https://cdn.pluggy.ai/assets/connector-icons/211.svg"
+    },
+    {
+      "connectorId": 608,
+      "name": "Santander",
+      "imageUrl": "https://cdn.pluggy.ai/assets/connector-icons/208.svg"
+    },
+    {
+      "connectorId": 659,
+      "name": "Banrisul",
+      "imageUrl": "https://cdn.pluggy.ai/assets/connector-icons/659.svg"
+    },
+    {
+      "connectorId": 215,
+      "name": "Inter",
+      "imageUrl": "https://cdn.pluggy.ai/assets/connector-icons/215.svg"
+    },
+    {
+      "connectorId": 619,
+      "name": "Caixa Econômica Federal",
+      "imageUrl": "https://cdn.pluggy.ai/assets/connector-icons/219.svg"
+    },
+    {
+      "connectorId": 787,
+      "name": "Stone Pagamentos",
+      "imageUrl": "https://cdn.pluggy.ai/assets/connector-icons/787.svg"
+    },
+    {
+      "connectorId": 675,
+      "name": "BTGPactual",
+      "imageUrl": "https://cdn.pluggy.ai/assets/connector-icons/214.svg"
+    },
+    {
+      "connectorId": 603,
+      "name": "Bradesco",
+      "imageUrl": "https://cdn.pluggy.ai/assets/connector-icons/203.svg"
+    },
+    {
+      "connectorId": 612,
+      "name": "Nubank",
+      "imageUrl": "https://cdn.pluggy.ai/assets/connector-icons/212.svg"
+    },
+    {
+      "connectorId": 692,
+      "name": "PagBank",
+      "imageUrl": "https://cdn.pluggy.ai/assets/connector-icons/692.svg"
+    },
+    {
+      "connectorId": 206,
+      "name": "Mercado Pago",
+      "imageUrl": "https://cdn.pluggy.ai/assets/connector-icons/206.svg"
+    },
+    {
+      "connectorId": 626,
+      "name": "C6 Bank",
+      "imageUrl": "https://cdn.pluggy.ai/assets/connector-icons/726.svg"
+    },
+    {
+      "connectorId": 601,
+      "name": "Itaú",
+      "imageUrl": "https://cdn.pluggy.ai/assets/connector-icons/201.svg"
+    },
+    {
+      "connectorId": 202,
+      "name": "XP Investimentos",
+      "imageUrl": "https://cdn.pluggy.ai/assets/connector-icons/202.svg"
+    },
+    {
+      "connectorId": 651,
+      "name": "PicPay",
+      "imageUrl": "https://cdn.pluggy.ai/assets/connector-icons/651.svg"
+    },
+    {
+      "connectorId": 742,
+      "name": "Banco Mercantil",
+      "imageUrl": "https://cdn.pluggy.ai/assets/connector-icons/742.svg"
+    },
+    {
+      "connectorId": 629,
+      "name": "Safra",
+      "imageUrl": "https://cdn.pluggy.ai/assets/connector-icons/629.svg"
+    },
+    {
+      "connectorId": 661,
+      "name": "Sicredi",
+      "imageUrl": "https://cdn.pluggy.ai/assets/connector-icons/661.svg"
+    },
+    {
+      "connectorId": 658,
+      "name": "Sicoob",
+      "imageUrl": "https://cdn.pluggy.ai/assets/connector-icons/228.svg"
+    },
+    {
+      "connectorId": 689,
+      "name": "Neon",
+      "imageUrl": "https://cdn.pluggy.ai/assets/connector-icons/689.svg"
+    },
+    {
+      "connectorId": 656,
+      "name": "Next",
+      "imageUrl": "https://cdn.pluggy.ai/assets/connector-icons/656.svg"
+    }
+  ]
+}

@@ -1,0 +1,210 @@
+name: Deploy (produção)
+
+# Deploy de produção em dois caminhos:
+# - automático: depois que o CI fica verde em um push na main (workflow_run);
+# - manual (workflow_dispatch): escolhe migrations, API e web.
+# Em ambos, o que não pode faltar é o CI verde do commit que vai para o ar: o deploy
+# só pega o run concluído com sucesso e faz checkout exatamente do `head_sha` dele.
+# Um commit cuja **primeira linha** traz `[skip deploy]` não dispara o deploy automático.
+# Só o assunto conta: o merge com squash junta as mensagens dos commits, e um corpo que
+# fale do marcador (como este) não pode desligar o deploy do próprio PR.
+#
+# Nada aqui cria D1, KV, Worker ou projeto Pages; sem CLOUDFLARE_API_TOKEN/ACCOUNT_ID
+# o workflow avisa e pula. O primeiro provisionamento está em docs/deploy.md.
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      run_migrations:
+        description: "Aplicar migrations no D1 remoto antes do deploy"
+        required: true
+        type: boolean
+        default: true
+      deploy_api:
+        description: "Fazer deploy do Worker finance-dashboard-api"
+        required: true
+        type: boolean
+        default: true
+      deploy_web:
+        description: "Fazer deploy do site no projeto Pages finance-dashboard-web"
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy para produção
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # workflow_dispatch sempre roda; workflow_run só para push na main com CI verde.
+    # `event == 'push'` é a trava que impede um run de pull_request de publicar a
+    # branch do PR em produção, independente de como o filtro `branches` do gatilho
+    # resolve o PR. O [skip deploy] é avaliado no assunto, dentro do job (bash),
+    # porque o merge com squash concatena as mensagens dos commits.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.conclusion == 'success')
+
+    steps:
+      - name: Opções do deploy
+        id: opts
+        shell: bash
+        env:
+          EVENT: ${{ github.event_name }}
+          MESSAGE: ${{ github.event.workflow_run.head_commit.message }}
+          IN_RUN_MIGRATIONS: ${{ inputs.run_migrations }}
+          IN_DEPLOY_API: ${{ inputs.deploy_api }}
+          IN_DEPLOY_WEB: ${{ inputs.deploy_web }}
+        run: |
+          # Só a primeira linha (assunto) conta: o squash traz os corpos dos commits junto.
+          subject="${MESSAGE%%$'\n'*}"
+          if [[ "$subject" == *"[skip deploy]"* ]]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::Assunto do commit pede [skip deploy]. Deploy ignorado."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          # `inputs.*` só existe no workflow_dispatch; no workflow_run vazio leria como false.
+          if [[ "$EVENT" == "workflow_dispatch" ]]; then
+            echo "run_migrations=$IN_RUN_MIGRATIONS" >> "$GITHUB_OUTPUT"
+            echo "deploy_api=$IN_DEPLOY_API" >> "$GITHUB_OUTPUT"
+            echo "deploy_web=$IN_DEPLOY_WEB" >> "$GITHUB_OUTPUT"
+          else
+            echo "run_migrations=true" >> "$GITHUB_OUTPUT"
+            echo "deploy_api=true" >> "$GITHUB_OUTPUT"
+            echo "deploy_web=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Verificar secrets do Cloudflare
+        id: guard
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_D1_DATABASE_ID: ${{ secrets.CLOUDFLARE_D1_DATABASE_ID }}
+          CLOUDFLARE_KV_NAMESPACE_ID: ${{ secrets.CLOUDFLARE_KV_NAMESPACE_ID }}
+        run: |
+          if [[ "${{ steps.opts.outputs.skip }}" == "true" ]]; then
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "reason=skip" >> "$GITHUB_OUTPUT"
+          elif [[ -z "${CLOUDFLARE_API_TOKEN}" || -z "${CLOUDFLARE_ACCOUNT_ID}" || -z "${CLOUDFLARE_D1_DATABASE_ID}" || -z "${CLOUDFLARE_KV_NAMESPACE_ID}" ]]; then
+            echo "::warning::Secrets do Cloudflare ausentes (CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_D1_DATABASE_ID ou CLOUDFLARE_KV_NAMESPACE_ID). Deploy ignorado."
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "reason=secrets" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "reason=ok" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout
+        if: ${{ steps.guard.outputs.enabled == 'true' }}
+        uses: actions/checkout@v4
+        with:
+          # No workflow_run, `github.sha` é a ponta da main; o commit do CI é o head_sha.
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Setup pnpm
+        if: ${{ steps.guard.outputs.enabled == 'true' }}
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        if: ${{ steps.guard.outputs.enabled == 'true' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Instalar dependências
+        if: ${{ steps.guard.outputs.enabled == 'true' }}
+        run: pnpm install --frozen-lockfile
+
+      - name: Build (web + dry-run da API)
+        if: ${{ steps.guard.outputs.enabled == 'true' }}
+        run: pnpm build
+
+      - name: Aplicar migrations no D1 remoto
+        if: ${{ steps.guard.outputs.enabled == 'true' && steps.opts.outputs.run_migrations == 'true' }}
+        working-directory: apps/api
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_D1_DATABASE_ID: ${{ secrets.CLOUDFLARE_D1_DATABASE_ID }}
+          CLOUDFLARE_KV_NAMESPACE_ID: ${{ secrets.CLOUDFLARE_KV_NAMESPACE_ID }}
+        run: pnpm run db:migrate:remote
+
+      - name: Deploy do Worker da API
+        if: ${{ steps.guard.outputs.enabled == 'true' && steps.opts.outputs.deploy_api == 'true' }}
+        working-directory: apps/api
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_D1_DATABASE_ID: ${{ secrets.CLOUDFLARE_D1_DATABASE_ID }}
+          CLOUDFLARE_KV_NAMESPACE_ID: ${{ secrets.CLOUDFLARE_KV_NAMESPACE_ID }}
+        run: pnpm run deploy
+
+      - name: Deploy do site (Cloudflare Pages)
+        if: ${{ steps.guard.outputs.enabled == 'true' && steps.opts.outputs.deploy_web == 'true' }}
+        working-directory: apps/api
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        # --cwd garante que o wrangler.jsonc e a pasta functions/ do apps/web
+        # sejam usados, reaproveitando o wrangler instalado no @fd/api.
+        run: >-
+          pnpm exec wrangler pages deploy dist
+          --cwd ../../apps/web
+          --project-name finance-dashboard-web
+          --branch main
+
+      - name: Smoke de produção
+        if: ${{ steps.guard.outputs.enabled == 'true' && steps.opts.outputs.deploy_web == 'true' }}
+        shell: bash
+        env:
+          PROD_URL: ${{ secrets.PROD_URL }}
+        run: |
+          if [[ -z "${PROD_URL}" ]]; then
+            echo "::notice::Secret PROD_URL ausente; smoke de produção ignorado."
+            exit 0
+          fi
+          node bin/agent-cli smoke prod
+
+      - name: Resumo
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          if [[ "${{ steps.guard.outputs.enabled }}" != "true" ]]; then
+            {
+              echo "### Deploy ignorado"
+              echo
+              if [[ "${{ steps.guard.outputs.reason }}" == "skip" ]]; then
+                echo "O assunto do commit pede \`[skip deploy]\`."
+              else
+                echo "Configure os secrets \`CLOUDFLARE_API_TOKEN\`, \`CLOUDFLARE_ACCOUNT_ID\`, \`CLOUDFLARE_D1_DATABASE_ID\` e \`CLOUDFLARE_KV_NAMESPACE_ID\` no repositório para habilitar o deploy."
+              fi
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          {
+            echo "### Deploy de produção executado"
+            echo
+            echo "- Origem: ${{ github.event_name }}"
+            echo "- Commit: \`${{ github.event.workflow_run.head_sha || github.sha }}\`"
+            echo "- Migrations remotas: ${{ steps.opts.outputs.run_migrations }}"
+            echo "- Worker da API: ${{ steps.opts.outputs.deploy_api }}"
+            echo "- Site no Pages: ${{ steps.opts.outputs.deploy_web }}"
+          } >> "$GITHUB_STEP_SUMMARY"

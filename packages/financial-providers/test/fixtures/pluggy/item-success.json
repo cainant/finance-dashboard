@@ -1,0 +1,29 @@
+{
+  "id": "item-sandbox-001",
+  "connector": {
+    "id": 1,
+    "name": "Pluggy Bank",
+    "primaryColor": "ef294b",
+    "imageUrl": "https://cdn.example.test/pluggy-bank.png",
+    "type": "PERSONAL_BANK",
+    "isSandbox": true
+  },
+  "status": "UPDATED",
+  "executionStatus": "SUCCESS",
+  "error": null,
+  "parameter": null,
+  "userAction": null,
+  "webhookUrl": null,
+  "createdAt": "2026-11-10T12:00:00.000Z",
+  "updatedAt": "2026-11-10T12:00:05.000Z",
+  "lastUpdatedAt": "2026-11-10T12:00:05.000Z",
+  "statusDetail": null,
+  "nextAutoSyncAt": "2026-11-11T12:00:00.000Z",
+  "consecutiveFailedLoginAttempts": 0,
+  "consentExpiresAt": "2027-11-10T12:00:00.000Z",
+  "resourcesCollectedAt": "2026-11-10T12:00:05.000Z",
+  "hasResourcesPendingAuthorization": false,
+  "products": ["ACCOUNTS", "CREDIT_CARDS", "TRANSACTIONS", "INVESTMENTS"],
+  "clientUserId": "fixture-user",
+  "oauthRedirectUri": null
+}

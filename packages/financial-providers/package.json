@@ -1,0 +1,29 @@
+{
+  "name": "@fd/financial-providers",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Interface FinancialProvider + DemoProvider + PluggyProvider",
+  "exports": {
+    ".": "./src/index.ts",
+    "./bills": "./src/bills.ts",
+    "./cache": "./src/cache.ts",
+    "./categories": "./src/categories.ts",
+    "./demo": "./src/demo/index.ts",
+    "./errors": "./src/errors.ts",
+    "./pluggy": "./src/pluggy/index.ts",
+    "./registry": "./src/registry.ts",
+    "./types": "./src/types.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@fd/config": "workspace:*",
+    "eslint": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "name": "@fd/database",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Schema Drizzle, migrations SQL (D1) e seed",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./src/schema.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "db:generate": "drizzle-kit generate",
+    "db:check": "drizzle-kit check",
+    "hash-password": "node scripts/hash-password.mjs"
+  },
+  "dependencies": {
+    "drizzle-orm": "0.45.4"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20261110.1",
+    "@fd/config": "workspace:*",
+    "drizzle-kit": "0.31.11",
+    "eslint": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

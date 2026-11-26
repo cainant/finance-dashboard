@@ -1,0 +1,65 @@
+{
+  "total": 2,
+  "totalPages": 1,
+  "page": 1,
+  "results": [
+    {
+      "id": "00000000-0000-4000-8000-000000000011",
+      "type": "BANK",
+      "subtype": "CHECKING_ACCOUNT",
+      "name": "Nu Pagamentos S.A. - Instituição de Pagamento",
+      "balance": 0,
+      "currencyCode": "BRL",
+      "itemId": "00000000-0000-4000-8000-0000000000b1",
+      "number": "0001/00000-0",
+      "createdAt": "2026-11-11T00:40:18.856Z",
+      "updatedAt": "2026-11-11T00:40:19.230Z",
+      "marketingName": "Nu Pagamentos S.A. - Instituição de Pagamento (Conta Pré-paga)",
+      "taxNumber": "***.***.***-**",
+      "owner": "Titular de Teste",
+      "bankData": {
+        "transferNumber": "260/0001/00000-0",
+        "closingBalance": 0,
+        "automaticallyInvestedBalance": 0,
+        "overdraftContractedLimit": 0,
+        "overdraftUsedLimit": 0,
+        "unarrangedOverdraftAmount": 0,
+        "hasReservedBalance": true,
+        "reservedBalances": []
+      },
+      "creditData": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000012",
+      "type": "CREDIT",
+      "subtype": "CREDIT_CARD",
+      "name": "platinum",
+      "balance": 0,
+      "currencyCode": "BRL",
+      "itemId": "00000000-0000-4000-8000-0000000000b1",
+      "number": "0000",
+      "createdAt": "2026-11-11T00:40:19.248Z",
+      "updatedAt": "2026-11-11T00:40:20.173Z",
+      "marketingName": null,
+      "taxNumber": "***.***.***-**",
+      "owner": "Titular de Teste",
+      "bankData": null,
+      "creditData": {
+        "level": "PLATINUM",
+        "brand": "MASTERCARD",
+        "brandAdditionalInfo": "NA",
+        "balanceCloseDate": null,
+        "balanceDueDate": "2026-10-22",
+        "availableCreditLimit": 0,
+        "balanceForeignCurrency": 0,
+        "minimumPayment": 0,
+        "creditLimit": 0,
+        "isLimitFlexible": false,
+        "holderType": null,
+        "status": "ACTIVE",
+        "disaggregatedCreditLimits": null,
+        "additionalCards": null
+      }
+    }
+  ]
+}

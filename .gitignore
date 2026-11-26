@@ -1,0 +1,30 @@
+# Dependências
+node_modules/
+
+# Build
+dist/
+.turbo/
+
+# Cloudflare
+.wrangler/
+.wrangler.prod.generated.jsonc
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+.env.deploy
+
+# Testes
+coverage/
+playwright-report/
+blob-report/
+test-results/
+apps/web/e2e/.auth/
+
+# Arquivos locais
+*.local
+*.log
+.DS_Store
+
+# Skills instaladas pelo pnpm (estado local da máquina)
+.agents/
+.claude/

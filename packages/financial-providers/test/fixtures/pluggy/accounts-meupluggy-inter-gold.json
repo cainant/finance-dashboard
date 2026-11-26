@@ -1,0 +1,91 @@
+{
+  "total": 3,
+  "totalPages": 1,
+  "page": 1,
+  "results": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "type": "BANK",
+      "subtype": "CHECKING_ACCOUNT",
+      "name": "BANCO INTER",
+      "balance": 0,
+      "currencyCode": "BRL",
+      "itemId": "00000000-0000-4000-8000-0000000000a1",
+      "number": "0001/00000-0",
+      "createdAt": "2026-11-11T00:44:17.600Z",
+      "updatedAt": "2026-11-11T00:44:18.465Z",
+      "marketingName": null,
+      "taxNumber": "***.***.***-**",
+      "owner": "Titular de Teste",
+      "bankData": {
+        "transferNumber": "077/0001/00000-0",
+        "closingBalance": 0,
+        "automaticallyInvestedBalance": 0,
+        "overdraftContractedLimit": 0,
+        "overdraftUsedLimit": 0,
+        "unarrangedOverdraftAmount": 0,
+        "hasReservedBalance": null,
+        "reservedBalances": null
+      },
+      "creditData": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000002",
+      "type": "BANK",
+      "subtype": "SAVINGS_ACCOUNT",
+      "name": "BANCO INTER",
+      "balance": 0,
+      "currencyCode": "BRL",
+      "itemId": "00000000-0000-4000-8000-0000000000a1",
+      "number": "0001/00000-0",
+      "createdAt": "2026-11-11T00:44:18.472Z",
+      "updatedAt": "2026-11-11T00:44:18.472Z",
+      "marketingName": null,
+      "taxNumber": "***.***.***-**",
+      "owner": "Titular de Teste",
+      "bankData": {
+        "transferNumber": "077/0001/00000-0",
+        "closingBalance": 0,
+        "automaticallyInvestedBalance": 0,
+        "overdraftContractedLimit": 0,
+        "overdraftUsedLimit": 0,
+        "unarrangedOverdraftAmount": 0,
+        "hasReservedBalance": null,
+        "reservedBalances": null
+      },
+      "creditData": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000003",
+      "type": "CREDIT",
+      "subtype": "CREDIT_CARD",
+      "name": "GOLD",
+      "balance": 0,
+      "currencyCode": "BRL",
+      "itemId": "00000000-0000-4000-8000-0000000000a1",
+      "number": "0000",
+      "createdAt": "2026-11-11T00:44:18.500Z",
+      "updatedAt": "2026-11-11T00:44:19.070Z",
+      "marketingName": null,
+      "taxNumber": "***.***.***-**",
+      "owner": "Titular de Teste",
+      "bankData": null,
+      "creditData": {
+        "level": "GOLD",
+        "brand": "MASTERCARD",
+        "brandAdditionalInfo": null,
+        "balanceCloseDate": null,
+        "balanceDueDate": "2026-11-07",
+        "availableCreditLimit": 0,
+        "balanceForeignCurrency": 0,
+        "minimumPayment": 0,
+        "creditLimit": 0,
+        "isLimitFlexible": false,
+        "holderType": null,
+        "status": "ACTIVE",
+        "disaggregatedCreditLimits": null,
+        "additionalCards": null
+      }
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "name": "@fd/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "API REST (Cloudflare Workers + Hono + D1/Drizzle)",
+  "scripts": {
+    "dev": "wrangler dev --port 8787",
+    "build": "wrangler deploy --dry-run --outdir dist",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "cf-typegen": "wrangler types",
+    "db:migrate:local": "wrangler d1 migrations apply DB --local",
+    "db:seed:local": "wrangler d1 execute DB --local --file=../../packages/database/seed.sql",
+    "db:reset:local": "wrangler d1 execute DB --local --file=scripts/reset-local.sql && wrangler d1 migrations apply DB --local && wrangler d1 execute DB --local --file=../../packages/database/seed.sql",
+    "db:migrate:remote": "node scripts/with-prod-wrangler.mjs d1 migrations apply DB --remote --env production",
+    "deploy": "node scripts/with-prod-wrangler.mjs deploy --env production",
+    "pluggy:webhook": "node scripts/register-pluggy-webhook.mjs"
+  },
+  "dependencies": {
+    "@fd/contracts": "workspace:*",
+    "@fd/database": "workspace:*",
+    "@fd/financial-providers": "workspace:*",
+    "@hono/zod-validator": "0.9.1",
+    "drizzle-orm": "0.45.4",
+    "hono": "4.13.17",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-plugin": "1.7.0",
+    "@fd/config": "workspace:*",
+    "@types/node": "catalog:",
+    "eslint": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "5.1.0",
+    "wrangler": "4.160.0"
+  }
+}

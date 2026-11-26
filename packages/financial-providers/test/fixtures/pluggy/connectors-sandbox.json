@@ -1,0 +1,15 @@
+{
+  "total": 1,
+  "totalPages": 1,
+  "page": 1,
+  "results": [
+    {
+      "id": 1,
+      "name": "Pluggy Bank",
+      "primaryColor": "ef294b",
+      "type": "PERSONAL_BANK",
+      "isSandbox": true,
+      "products": ["ACCOUNTS", "CREDIT_CARDS", "TRANSACTIONS", "INVESTMENTS"]
+    }
+  ]
+}

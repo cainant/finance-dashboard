@@ -1,0 +1,56 @@
+packages:
+  - apps/*
+  - packages/*
+
+# Scripts de instalação permitidos (modelo de permissões do pnpm 12).
+allowBuilds:
+  esbuild: true
+  workerd: true
+
+# Versões compartilhadas de ferramentas. Pacotes usam "catalog:" para evitar drift.
+catalog:
+  "@types/node": 24.19.2
+  eslint: 10.14.0
+  prettier: 3.9.10
+  typescript: 6.0.3
+  vitest: 5.1.0
+
+# Pacotes publicados há menos de 7 dias precisam de exclusão explícita no
+# supply-chain gate do pnpm 12.
+minimumReleaseAgeExclude:
+  - "@cloudflare/workerd-darwin-64@1.20261110.1"
+  - "@cloudflare/workerd-darwin-arm64@1.20261110.1"
+  - "@cloudflare/workerd-linux-64@1.20261110.1"
+  - "@cloudflare/workerd-linux-arm64@1.20261110.1"
+  - "@cloudflare/workerd-windows-64@1.20261110.1"
+  - "@cloudflare/workers-types@5.20261110.1"
+  - "@typescript-eslint/eslint-plugin@8.72.2"
+  - "@typescript-eslint/parser@8.72.2"
+  - "@typescript-eslint/project-service@8.72.2"
+  - "@typescript-eslint/scope-manager@8.72.2"
+  - "@typescript-eslint/tsconfig-utils@8.72.2"
+  - "@typescript-eslint/type-utils@8.72.2"
+  - "@typescript-eslint/types@8.72.2"
+  - "@typescript-eslint/typescript-estree@8.72.2"
+  - "@typescript-eslint/utils@8.72.2"
+  - "@typescript-eslint/visitor-keys@8.72.2"
+  - lucide-react@1.71.0
+  - miniflare@5.20261110.0-beta
+  - typescript-eslint@8.72.2
+  - workerd@1.20261110.1
+  - wrangler@4.160.0
+  - "@cloudflare/vitest-plugin@1.7.0"
+
+permissions:
+  "@tanstack/react-router":
+    skills: true
+  "@tanstack/react-table":
+    skills: true
+  "@tanstack/router-plugin":
+    skills: true
+
+# Skills dos pacotes TanStack (pnpm 12) linkadas para os agentes. Diretórios gitignored;
+# declarados explicitamente para o install funcionar no CI (onde não existem).
+skills:
+  dirs:
+    - .agents/skills

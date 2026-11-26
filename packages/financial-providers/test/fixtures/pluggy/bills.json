@@ -1,0 +1,46 @@
+{
+  "total": 2,
+  "totalPages": 1,
+  "page": 1,
+  "results": [
+    {
+      "id": "bill-credit-2026-09",
+      "dueDate": "2026-10-12T00:00:00.000Z",
+      "billClosingDate": "2026-10-05T00:00:00.000Z",
+      "totalAmount": 2450.75,
+      "totalAmountCurrencyCode": "BRL",
+      "minimumPaymentAmount": 245.08,
+      "allowsInstallments": true,
+      "financeCharges": [],
+      "payments": [
+        {
+          "id": "e5f6a7b8-0001-4c5d-8e9f-000000000001",
+          "valueType": "FULL_PAYMENT",
+          "paymentDate": "2026-10-10T00:00:00.000Z",
+          "paymentMode": "PIX",
+          "amount": 2450.75,
+          "currencyCode": "BRL"
+        }
+      ]
+    },
+    {
+      "id": "bill-credit-2026-10",
+      "dueDate": "2026-11-12T00:00:00.000Z",
+      "billClosingDate": "2026-11-05T00:00:00.000Z",
+      "totalAmount": 1810.4,
+      "totalAmountCurrencyCode": "BRL",
+      "minimumPaymentAmount": 181.04,
+      "allowsInstallments": true,
+      "financeCharges": [
+        {
+          "id": "e5f6a7b8-0002-4c5d-8e9f-000000000002",
+          "type": "IOF",
+          "amount": 7.01,
+          "currencyCode": "BRL",
+          "additionalInfo": "NA"
+        }
+      ],
+      "payments": []
+    }
+  ]
+}

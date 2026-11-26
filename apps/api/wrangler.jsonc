@@ -1,0 +1,76 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "finance-dashboard-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "observability": {
+    "enabled": true,
+  },
+  "vars": {
+    "APP_ENV": "development",
+    "ENABLE_DEMO_PROVIDER": "true",
+    "ENABLE_PASSWORD_LOGIN": "true",
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "finance-dashboard",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "../../packages/database/migrations",
+    },
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "CACHE",
+      "id": "00000000000000000000000000000000",
+    },
+  ],
+  "triggers": {
+    "crons": ["0 */6 * * *"],
+  },
+  "env": {
+    // Produção: deploy com `wrangler deploy --env production`.
+    // Bindings e vars não são herdados do topo, por isso estão repetidos aqui.
+    "production": {
+      "name": "finance-dashboard-api",
+      "workers_dev": false,
+      "vars": {
+        "APP_ENV": "production",
+        // Produção usa somente dados reais do MeuPluggy; o modo demonstração
+        // existe apenas em desenvolvimento/testes (o e2e depende dele).
+        "ENABLE_DEMO_PROVIDER": "false",
+        "ENABLE_PASSWORD_LOGIN": "false",
+        // ALLOWED_GITHUB_LOGINS fica como secret em produção (`wrangler secret put ALLOWED_GITHUB_LOGINS --env production`)
+        // para não expor os logins autorizados no repositório público.
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "finance-dashboard",
+          // Injetado em runtime de deploy via CLOUDFLARE_D1_DATABASE_ID (scripts/with-prod-wrangler.mjs).
+          "database_id": "00000000-0000-0000-0000-000000000000",
+          "migrations_dir": "../../packages/database/migrations",
+        },
+      ],
+      "kv_namespaces": [
+        {
+          "binding": "CACHE",
+          // Injetado em runtime de deploy via CLOUDFLARE_KV_NAMESPACE_ID (scripts/with-prod-wrangler.mjs).
+          "id": "00000000000000000000000000000000",
+        },
+      ],
+      "triggers": {
+        "crons": ["0 */6 * * *"],
+      },
+    },
+  },
+  // Exemplo de fila (NÃO usado na v1: o plano Free não inclui Queues; a
+  // sincronização roda inline com ctx.waitUntil). Descomente junto com o
+  // binding `SYNC_QUEUE` em Env e o handler `queue` se o plano mudar.
+  // "queues": {
+  //   "producers": [{ "binding": "SYNC_QUEUE", "queue": "finance-dashboard-sync" }],
+  //   "consumers": [{ "queue": "finance-dashboard-sync", "max_batch_size": 10 }]
+  // }
+}

@@ -1,0 +1,21 @@
+# Secrets locais de desenvolvimento (copie para .dev.vars). Nunca commite .dev.vars.
+#
+# Pluggy (Open Finance). Sem clientId/clientSecret o provider aparece em
+# /api/providers como `configured: false` e as rotas respondem 502.
+# Também usadas por `agent-cli smoke pluggy` (item do sandbox oficial; gitignored, `wt setup` copia).
+PLUGGY_CLIENT_ID=
+PLUGGY_CLIENT_SECRET=
+# Segredo enviado pelo Pluggy no header `x-webhook-secret` (POST /api/webhooks/pluggy).
+PLUGGY_WEBHOOK_SECRET=
+# Usadas somente pelo script scripts/register-pluggy-webhook.mjs (não são vars do Worker):
+# PLUGGY_WEBHOOK_URL=https://<dominio>/api/webhooks/pluggy
+# APP_URL=http://127.0.0.1:5173
+#
+# GitHub OAuth. Cadastre a callback URL do ambiente:
+#   http://127.0.0.1:8787/api/auth/github/callback  (wrangler dev)
+#   https://<app>.pages.dev/api/auth/github/callback (produção)
+# A allowlist fica em `ALLOWED_GITHUB_LOGINS` (em dev, `wrangler.jsonc`/`.dev.vars`;
+# em produção, secret do Worker via `wrangler secret put ALLOWED_GITHUB_LOGINS --env production`),
+# separada por vírgulas.
+GITHUB_CLIENT_ID=
+GITHUB_CLIENT_SECRET=

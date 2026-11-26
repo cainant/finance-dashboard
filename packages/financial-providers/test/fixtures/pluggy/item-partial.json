@@ -1,0 +1,53 @@
+{
+  "id": "item-sandbox-001",
+  "connector": {
+    "id": 1,
+    "name": "Pluggy Bank",
+    "primaryColor": "ef294b",
+    "imageUrl": "https://cdn.example.test/pluggy-bank.png",
+    "type": "PERSONAL_BANK",
+    "isSandbox": true
+  },
+  "status": "UPDATED",
+  "executionStatus": "PARTIAL_SUCCESS",
+  "error": null,
+  "parameter": null,
+  "userAction": null,
+  "webhookUrl": null,
+  "createdAt": "2026-11-10T12:00:00.000Z",
+  "updatedAt": "2026-11-10T12:01:30.000Z",
+  "lastUpdatedAt": "2026-11-10T12:01:30.000Z",
+  "statusDetail": {
+    "isUpdated": true,
+    "products": [
+      {
+        "product": "ACCOUNTS",
+        "isUpdated": true,
+        "warnings": []
+      },
+      {
+        "product": "CREDIT_CARDS",
+        "isUpdated": true,
+        "warnings": ["Credit card details were partially retrieved"]
+      },
+      {
+        "product": "TRANSACTIONS",
+        "isUpdated": false,
+        "warnings": ["Transactions are not available for this connector"]
+      },
+      {
+        "product": "INVESTMENTS",
+        "isUpdated": false,
+        "warnings": ["Investments are not available for this connector"]
+      }
+    ]
+  },
+  "nextAutoSyncAt": "2026-11-11T12:00:00.000Z",
+  "consecutiveFailedLoginAttempts": 0,
+  "consentExpiresAt": "2027-11-10T12:00:00.000Z",
+  "resourcesCollectedAt": "2026-11-10T12:01:30.000Z",
+  "hasResourcesPendingAuthorization": false,
+  "products": ["ACCOUNTS", "CREDIT_CARDS", "TRANSACTIONS", "INVESTMENTS"],
+  "clientUserId": "fixture-user",
+  "oauthRedirectUri": null
+}

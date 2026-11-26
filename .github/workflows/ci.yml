@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# Dois jobs em paralelo: o tempo total é o do mais lento (e2e), não a soma.
+jobs:
+  checks:
+    name: format · lint · typecheck · test · build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # Cache do Turborepo: pacote sem alteração reaproveita lint/typecheck/test/build.
+      - name: Cache do Turborepo
+        uses: actions/cache@v4
+        with:
+          path: .turbo/cache
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-
+      - run: pnpm format:check
+      # Uma invocação só: o turbo roda as três tarefas em paralelo entre pacotes.
+      - run: pnpm exec turbo run lint typecheck build
+      # Testes à parte: há teste de orçamento de CPU que estoura se disputar núcleo com o lint.
+      - run: pnpm test
+
+  # Dois shards de máquina: cada um builda o front e roda metade dos testes.
+  # Custa ~2 min cobrados a mais por execução, mas corta o job mais lento pela metade.
+  e2e:
+    name: e2e (${{ matrix.shard }}/2)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      # Um shard vermelho não cancela o outro: o log dos dois chega inteiro.
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: pw-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+      - run: pnpm --filter @fd/web exec playwright install --with-deps chromium
+      - run: pnpm db:migrate:local && pnpm db:seed:local
+      - run: pnpm test:e2e --shard=${{ matrix.shard }}/2
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.shard }}
+          path: apps/web/playwright-report
+          retention-days: 3

@@ -1,0 +1,31 @@
+{
+  "name": "finance-dashboard",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Lumen Finance — dashboard pessoal de finanças (monorepo)",
+  "packageManager": "pnpm@12.14.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "test:e2e": "pnpm --filter @fd/web test:e2e",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "db:migrate:local": "pnpm --filter @fd/api db:migrate:local",
+    "db:seed:local": "pnpm --filter @fd/api db:seed:local",
+    "db:migrate:remote": "pnpm --filter @fd/api db:migrate:remote",
+    "deploy:prod": "pnpm build && pnpm db:migrate:remote && pnpm --filter @fd/api run deploy && pnpm --filter @fd/web run deploy && pnpm smoke:prod",
+    "verify": "node bin/agent-cli verify",
+    "smoke:prod": "node bin/agent-cli smoke prod",
+    "smoke:pluggy": "node bin/agent-cli smoke pluggy"
+  },
+  "devDependencies": {
+    "prettier": "3.9.10",
+    "turbo": "2.11.10"
+  }
+}

@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="pt-BR" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#030303" />
+    <meta
+      name="description"
+      content="Lumen Finance — painel pessoal de finanças, contas, transações e análises."
+    />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230e6ee6'/%3E%3Cpath d='M9 23V9h3.4v11.2H23V23H9Z' fill='%23ffffff'/%3E%3C/svg%3E"
+    />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Lumen" />
+    <title>Lumen Finance</title>
+    <!--
+      Aplica o tema antes do primeiro paint para evitar flash (dark é o padrão).
+      Script externo em public/theme-init.js: a política `script-src 'self'` dispensa
+      hash frágil de script inline. Mantenha a chave em sincronia com
+      src/components/theme/theme-context.ts.
+    -->
+    <script src="/theme-init.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,841 @@
+@import "@fontsource-variable/inter/index.css";
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Lumen Finance — design tokens ("estilo Cloudflare")
+ *
+ * Neutro e acromático: cinzas sem matiz, um único acento azul. Verde, vermelho
+ * e âmbar carregam significado (entrada, saída, atenção) e nunca viram cor de
+ * botão. Cards são planos (borda 1px, sem sombra); sombra só em popover,
+ * dialog e toast. Dark é o padrão; light é a tradução de contraste equivalente.
+ *
+ * Os nomes seguem o contrato do shadcn/ui para os primitivos funcionarem sem
+ * acoplamento; `--border-subtle` e `--subtle-foreground` são as únicas adições
+ * ao contrato. Escala em docs/design-system.md.
+ */
+:root,
+.light {
+  color-scheme: light;
+  --radius: 0.5rem;
+
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.18 0 0);
+
+  --card: oklch(1 0 0);
+  --card-foreground: var(--foreground);
+  --popover: oklch(1 0 0);
+  --popover-foreground: var(--foreground);
+
+  --primary: oklch(0.52 0.2 258);
+  /* Azul para texto/ícone ativo: o primário puro fica em ~4:1 sobre o escuro. */
+  --primary-ink: var(--primary);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.96 0 0);
+  --secondary-foreground: oklch(0.18 0 0);
+  --muted: oklch(0.96 0 0);
+  --muted-foreground: oklch(0.45 0 0);
+  --subtle-foreground: oklch(0.55 0 0);
+  --accent: oklch(0.96 0 0);
+  --accent-foreground: oklch(0.18 0 0);
+
+  --destructive: oklch(0.55 0.2 25);
+  --destructive-foreground: oklch(0.99 0.005 25);
+  --positive: oklch(0.5 0.13 160);
+  --positive-foreground: oklch(0.99 0.005 160);
+  --negative: oklch(0.55 0.2 25);
+  --negative-foreground: oklch(0.99 0.005 25);
+  --warning: oklch(0.5 0.12 70);
+  --warning-foreground: oklch(0.99 0.01 80);
+  --info: oklch(0.5 0.16 255);
+  --info-foreground: oklch(0.99 0.005 255);
+
+  --border: oklch(0.9 0 0);
+  --border-subtle: oklch(0.945 0 0);
+  --input: oklch(0.9 0 0);
+  --ring: oklch(0.52 0.2 258 / 60%);
+
+  --surface-1: oklch(1 0 0);
+  --surface-2: oklch(0.985 0 0);
+  --surface-3: oklch(0.96 0 0);
+
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.18 0 0);
+  --sidebar-accent: oklch(0.95 0 0);
+  --sidebar-accent-foreground: oklch(0.18 0 0);
+  --sidebar-border: var(--border);
+  --sidebar-primary: var(--primary);
+
+  --chart-1: oklch(0.55 0.2 258);
+  --chart-2: oklch(0.55 0.1 215);
+  --chart-3: oklch(0.62 0.13 75);
+  --chart-4: oklch(0.58 0.19 25);
+  --chart-5: oklch(0.55 0.14 295);
+
+  --elevation-xs: 0 1px 2px 0 oklch(0.2 0.02 262 / 0.06);
+  --elevation-card: none;
+  --elevation-popover:
+    0 2px 8px -2px oklch(0.2 0.02 262 / 0.1), 0 12px 32px -12px oklch(0.2 0.02 262 / 0.22);
+
+  /* Vidro: só o chrome fixo do mobile (barra superior e barra de abas). */
+  --glass-bar-bg: color-mix(in oklch, var(--background) 46%, transparent);
+  --glass-bar-solid: color-mix(in oklch, var(--background) 94%, var(--foreground));
+  --glass-tab-bg: color-mix(in oklch, var(--background) 58%, transparent);
+  --glass-tab-solid: color-mix(in oklch, var(--background) 92%, var(--foreground));
+  --glass-border: color-mix(in oklch, var(--foreground) 9%, transparent);
+  --glass-highlight: oklch(1 0 0 / 0.7);
+  --glass-shadow-tab:
+    0 12px 30px -16px oklch(0.2 0.02 262 / 0.3), inset 0 1px 0 var(--glass-highlight);
+}
+
+.dark {
+  color-scheme: dark;
+
+  --background: oklch(0.1 0 0);
+  --foreground: oklch(0.97 0 0);
+
+  --card: oklch(0.17 0 0);
+  --card-foreground: var(--foreground);
+  --popover: oklch(0.17 0 0);
+  --popover-foreground: var(--foreground);
+
+  --primary: oklch(0.56 0.2 258);
+  --primary-ink: color-mix(in oklch, var(--primary) 72%, var(--foreground));
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.205 0 0);
+  --secondary-foreground: oklch(0.97 0 0);
+  --muted: oklch(0.205 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --subtle-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.205 0 0);
+  --accent-foreground: oklch(0.97 0 0);
+
+  --destructive: oklch(0.65 0.2 25);
+  --destructive-foreground: oklch(0.14 0.02 25);
+  --positive: oklch(0.905 0.093 164);
+  --positive-foreground: oklch(0.16 0.02 164);
+  --negative: oklch(0.78 0.14 22);
+  --negative-foreground: oklch(0.14 0.02 25);
+  --warning: oklch(0.84 0.13 82);
+  --warning-foreground: oklch(0.16 0.03 82);
+  --info: oklch(0.72 0.13 255);
+  --info-foreground: oklch(0.14 0.03 255);
+
+  --border: oklch(0.32 0 0);
+  --border-subtle: oklch(0.24 0 0);
+  --input: oklch(0.32 0 0);
+  --ring: oklch(0.62 0.19 258 / 70%);
+
+  --surface-1: oklch(0.13 0 0);
+  --surface-2: oklch(0.17 0 0);
+  --surface-3: oklch(0.205 0 0);
+
+  --sidebar: oklch(0.1 0 0);
+  --sidebar-foreground: oklch(0.97 0 0);
+  --sidebar-accent: oklch(0.205 0 0);
+  --sidebar-accent-foreground: oklch(0.97 0 0);
+  --sidebar-border: var(--border);
+  --sidebar-primary: var(--primary);
+
+  --chart-1: oklch(0.67 0.17 257);
+  --chart-2: oklch(0.7 0.12 215);
+  --chart-3: oklch(0.8 0.13 85);
+  --chart-4: oklch(0.68 0.17 25);
+  --chart-5: oklch(0.7 0.13 290);
+
+  --elevation-xs: 0 1px 2px 0 oklch(0 0 0 / 0.25);
+  --elevation-card: none;
+  --elevation-popover: 0 2px 8px 0 oklch(0 0 0 / 0.35), 0 12px 32px -8px oklch(0 0 0 / 0.55);
+
+  --glass-bar-bg: color-mix(in oklch, var(--background) 38%, transparent);
+  --glass-bar-solid: color-mix(in oklch, var(--background) 92%, var(--foreground));
+  --glass-tab-bg: color-mix(in oklch, var(--background) 52%, transparent);
+  --glass-tab-solid: color-mix(in oklch, var(--background) 88%, var(--foreground));
+  --glass-border: oklch(1 0 0 / 0.08);
+  --glass-highlight: oklch(1 0 0 / 0.06);
+  --glass-shadow-tab: 0 14px 34px -18px oklch(0 0 0 / 0.75), inset 0 1px 0 var(--glass-highlight);
+}
+
+/* ==== BEGIN bottom-sheet: tokens (primitivo ui/bottom-sheet.tsx) ====
+ * Derivados do vidro do shell (`--glass-*`): mesma borda e mesmo brilho. O
+ * sheet é mais opaco que as barras (80–82% de `--card`, contra 46–58% de
+ * `--background`) porque carrega texto e formulário. */
+:root {
+  --glass-sheet-bg: color-mix(in oklch, var(--card) 80%, transparent);
+  --glass-sheet-border: var(--glass-border);
+  --glass-sheet-shadow:
+    0 -18px 48px -24px oklch(0.2 0.02 262 / 0.28), inset 0 1px 0 var(--glass-highlight);
+  --sheet-scrim-bg: oklch(0.2 0.01 262 / 0.34);
+  /* Mesma cor/alpha do scrim, separados: a calha do `html` mistura os dois. */
+  --sheet-scrim-color: oklch(0.2 0.01 262);
+  --sheet-scrim-alpha: 34%;
+}
+
+.dark {
+  --glass-sheet-bg: color-mix(in oklch, var(--card) 82%, transparent);
+  --glass-sheet-shadow: 0 -18px 48px -24px oklch(0 0 0 / 0.6), inset 0 1px 0 var(--glass-highlight);
+  --sheet-scrim-bg: oklch(0 0 0 / 0.5);
+  --sheet-scrim-color: oklch(0 0 0);
+  --sheet-scrim-alpha: 50%;
+}
+/* ==== END bottom-sheet: tokens ==== */
+
+@theme inline {
+  --font-sans:
+    "Inter Variable", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    sans-serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-ink: var(--primary-ink);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-subtle-foreground: var(--subtle-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-positive: var(--positive);
+  --color-positive-foreground: var(--positive-foreground);
+  --color-negative: var(--negative);
+  --color-negative-foreground: var(--negative-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-surface: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-primary: var(--sidebar-primary);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --radius-xs: calc(var(--radius) - 6px);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 12px);
+
+  --shadow-xs: var(--elevation-xs);
+  --shadow-card: var(--elevation-card);
+  --shadow-popover: var(--elevation-popover);
+
+  --animate-shimmer: shimmer 1.8s ease-in-out infinite;
+  --animate-fade-in: fade-in 180ms ease-out both;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ==== mobile: puxar para atualizar + transições de navegação ==== */
+
+/* Desliga o "puxar para recarregar" nativo (Chrome Android) e o elástico do iOS
+ * no topo da página, para o nosso indicador ser o único efeito do puxão. Só no
+ * `html` (o rolador do viewport): sheets, listas e contêineres com rolagem
+ * própria têm `overscroll-contain` e não dependem disto. Só abaixo de `lg`; o
+ * desktop não muda. */
+@media (max-width: 1023.98px) {
+  html {
+    overscroll-behavior-y: none;
+  }
+}
+
+/* Indicador do puxar: fixo sob a barra superior, escondido atrás dela até o
+ * puxão. Posição e opacidade vêm das variáveis `--ptr-y`/`--ptr-p`, escritas
+ * por ref durante o gesto (sem setState); só `transform` e `opacity` animam. */
+.pull-indicator {
+  --ptr-y: 0px;
+  --ptr-p: 0;
+  position: fixed;
+  /* Acima da barra fixa de busca da lista de Transações (z-20), abaixo da topbar (z-30). */
+  z-index: 25;
+  top: calc(3.5rem + env(safe-area-inset-top));
+  left: 50%;
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  margin-left: -1.125rem;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  background: var(--card);
+  color: var(--primary-ink);
+  opacity: var(--ptr-p);
+  transform: translate3d(0, calc(var(--ptr-y) - 2.75rem), 0);
+  transition:
+    transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 200ms ease;
+  pointer-events: none;
+}
+/* O CSS fora das camadas vence o `lg:hidden` do Tailwind: esconde aqui. */
+@media (min-width: 1024px) {
+  .pull-indicator {
+    display: none;
+  }
+}
+.pull-indicator[data-dragging="true"] {
+  transition: none;
+  will-change: transform, opacity;
+}
+.pull-indicator[data-refreshing="true"] {
+  --ptr-y: 3.5rem;
+  opacity: 1;
+}
+.pull-indicator[data-armed="true"] {
+  border-color: color-mix(in oklch, var(--primary) 55%, var(--border));
+}
+.pull-indicator-icon {
+  transform: rotate(calc(var(--ptr-p) * 270deg));
+}
+.pull-indicator[data-refreshing="true"] .pull-indicator-icon {
+  animation: pull-spin 800ms linear infinite;
+}
+@keyframes pull-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pull-indicator {
+    transition: none;
+  }
+  .pull-indicator-icon,
+  .pull-indicator[data-refreshing="true"] .pull-indicator-icon {
+    animation: none;
+    transform: none;
+  }
+}
+
+/* View Transitions (só abaixo de `lg`, só com tipos suportados e sem
+ * movimento reduzido: `lib/view-transitions.ts` decide). Entrar num detalhe
+ * empurra a página nova da direita; sair devolve. O chrome fixo ganha nomes
+ * próprios durante a transição para não deslizar junto, e usa fundo sólido
+ * (o vidro não sobrevive ao snapshot). Só `transform` e `opacity`. */
+@media (max-width: 1023.98px) {
+  :root:active-view-transition-type(nav-forward, nav-back) [data-slot="app-topbar"] {
+    view-transition-name: nav-topbar;
+  }
+  :root:active-view-transition-type(nav-forward, nav-back) [data-slot="mobile-tab-bar"] {
+    view-transition-name: nav-tabbar;
+  }
+  :root:active-view-transition-type(nav-forward, nav-back) .glass-bar {
+    background: var(--glass-bar-solid);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  :root:active-view-transition-type(nav-forward, nav-back) .glass-tabbar {
+    background: var(--glass-tab-solid);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  :root:active-view-transition-type(nav-forward, nav-back)::view-transition-old(root),
+  :root:active-view-transition-type(nav-forward, nav-back)::view-transition-new(root) {
+    mix-blend-mode: normal;
+    animation-duration: 300ms;
+    animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+    animation-fill-mode: both;
+  }
+  :root:active-view-transition-type(nav-forward)::view-transition-old(root) {
+    animation-name: nav-out-left;
+  }
+  :root:active-view-transition-type(nav-forward)::view-transition-new(root) {
+    animation-name: nav-in-right;
+  }
+  :root:active-view-transition-type(nav-back)::view-transition-old(root) {
+    z-index: 2;
+    animation-name: nav-out-right;
+  }
+  :root:active-view-transition-type(nav-back)::view-transition-new(root) {
+    z-index: 1;
+    animation-name: nav-in-left;
+  }
+}
+@keyframes nav-in-right {
+  from {
+    transform: translateX(100%);
+  }
+}
+@keyframes nav-out-left {
+  to {
+    transform: translateX(-22%);
+    opacity: 0.6;
+  }
+}
+@keyframes nav-in-left {
+  from {
+    transform: translateX(-22%);
+    opacity: 0.6;
+  }
+}
+@keyframes nav-out-right {
+  to {
+    transform: translateX(100%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+/* ==== END mobile: puxar para atualizar + transições ==== */
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html {
+    -webkit-tap-highlight-color: transparent;
+    text-rendering: optimizeLegibility;
+
+    /*
+     * Barra de rolagem estável: sem ela, toda tela que passa de uma página
+     * longa para uma curta (busca sem resultado, troca de rota) ganha ou perde
+     * a barra e o conteúdo inteiro desliza ~13px na horizontal no Windows.
+     * Reservar a calha mantém a coluna no mesmo x, com ou sem rolagem.
+     */
+    scrollbar-gutter: stable;
+
+    /* Acompanha o fade do overlay ao escurecer a calha (abaixo). */
+    transition: background-color 200ms ease;
+  }
+
+  /*
+   * Diálogos e painéis do Radix travam o scroll com `overflow: hidden` no body
+   * e compensam a barra removida com `margin-right` no próprio body. Com a
+   * calha já reservada pelo `scrollbar-gutter` acima não há diferença a
+   * compensar, e essa margem viraria o salto que queremos evitar — por isso é
+   * zerada aqui. O `!important` dentro de `@layer base` vence o `!important`
+   * sem layer que o `react-remove-scroll` injeta em runtime: em declarações
+   * important, as layers vêm antes do estilo sem layer.
+   */
+  body[data-scroll-locked] {
+    margin-right: 0 !important;
+  }
+
+  /*
+   * O overlay de diálogo/painel é `fixed inset-0` e termina antes da calha
+   * reservada: sobrava uma faixa da largura da barra sem escurecer (branca no
+   * tema claro). Pinta o canvas com a mesma mistura do `bg-black/60` dos
+   * overlays — mas só quando existe overlay de verdade: Select e DropdownMenu
+   * também travam o scroll (`data-scroll-locked` sem escurecer a tela) e
+   * tingir a calha só neles deixaria uma faixa cinza solta na borda.
+   */
+  html:has(body[data-scroll-locked] [data-slot$="-overlay"]) {
+    background-color: color-mix(in srgb, var(--background), black 60%);
+  }
+
+  /*
+   * Bottom sheet: a calha usa a cor do scrim do próprio sheet (mais claro que
+   * os 60% de preto dos painéis) e acompanha o arrasto — o gesto escreve
+   * `--bs-scrim` também no `html`. Vem depois da regra genérica (mesma
+   * especificidade), então vence nela.
+   */
+  html:has(body[data-scroll-locked] [data-slot="bottom-sheet-overlay"]) {
+    background-color: color-mix(
+      in srgb,
+      var(--background),
+      var(--sheet-scrim-color) calc(var(--sheet-scrim-alpha) * var(--bs-scrim, 1))
+    );
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "cv11", "ss01", "ss03";
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    letter-spacing: -0.02em;
+  }
+
+  ::selection {
+    background-color: color-mix(in oklch, var(--primary) 30%, transparent);
+  }
+
+  /* Foco visível global: nunca remova sem repor um anel equivalente. */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  /* Valores monetários e tabelas alinham dígitos por padrão. */
+  .tabular-nums,
+  [data-slot="money"] {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklch, var(--foreground) 18%, transparent) transparent;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer utilities {
+  /*
+   * Vidro do chrome mobile. `backdrop-filter` existe SOMENTE nestas duas
+   * classes (barra superior e barra de abas, fixas). Sem suporte ou com
+   * `prefers-reduced-transparency: reduce`, o fundo vira sólido.
+   */
+  .glass-bar {
+    background: var(--glass-bar-solid);
+  }
+  .glass-tabbar {
+    background: var(--glass-tab-solid);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow-tab);
+  }
+  @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+    @media (prefers-reduced-transparency: no-preference) {
+      .glass-bar {
+        background: var(--glass-bar-bg);
+        -webkit-backdrop-filter: blur(22px) saturate(170%);
+        backdrop-filter: blur(22px) saturate(170%);
+      }
+      .glass-tabbar {
+        background: var(--glass-tab-bg);
+        -webkit-backdrop-filter: blur(24px) saturate(180%);
+        backdrop-filter: blur(24px) saturate(180%);
+      }
+    }
+  }
+
+  /* Entrada do título compacto: só opacity + transform. */
+  @keyframes compact-title-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .animate-compact-title {
+    animation: compact-title-in 180ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  /*
+   * Compatibilidade: o redesign removeu os gradientes de marca, mas as classes
+   * continuam existindo (planas) até o shell/auth migrar para o novo padrão.
+   */
+  .text-gradient-brand {
+    color: var(--foreground);
+    background-image: none;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+  }
+
+  .bg-auth-canvas {
+    background-color: var(--background);
+    background-image: none;
+  }
+
+  .bg-grid-faint {
+    background-image:
+      linear-gradient(
+        to right,
+        color-mix(in oklch, var(--foreground) 5%, transparent) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        to bottom,
+        color-mix(in oklch, var(--foreground) 5%, transparent) 1px,
+        transparent 1px
+      );
+    background-size: 44px 44px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black, transparent 75%);
+  }
+}
+
+/* ==== BEGIN bottom-sheet: regras ====
+ * Só `transform` e `opacity` animam. `--bs-drag` (px) e `--bs-scrim` (0–1) são
+ * escritos pelo gesto de arrasto; `--bs-kb` é o espaço do teclado virtual.
+ * `backdrop-filter` existe só enquanto o sheet está montado (aberto ou saindo). */
+@layer components {
+  .bottom-sheet-scrim {
+    background: var(--sheet-scrim-bg);
+    opacity: var(--bs-scrim, 1);
+  }
+  .bottom-sheet-scrim[data-state="open"] {
+    animation: bottom-sheet-scrim-in 240ms ease both;
+  }
+  .bottom-sheet-scrim[data-state="closed"] {
+    animation: bottom-sheet-scrim-out 220ms ease both;
+  }
+
+  .bottom-sheet {
+    bottom: var(--bs-kb, 0px);
+    max-height: min(86dvh, calc(100dvh - var(--bs-kb, 0px) - env(safe-area-inset-top, 0px) - 72px));
+    border: 1px solid var(--glass-sheet-border);
+    border-bottom: 0;
+    border-radius: 28px 28px 0 0;
+    background: var(--glass-sheet-bg);
+    box-shadow: var(--glass-sheet-shadow);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    backdrop-filter: blur(28px) saturate(180%);
+    transform: translateY(var(--bs-drag, 0px));
+    transition: transform 280ms cubic-bezier(0.32, 0.72, 0, 1);
+    will-change: transform;
+  }
+  /* Cobre a fresta que o overshoot da mola abre abaixo do sheet. */
+  .bottom-sheet::after {
+    content: "";
+    position: absolute;
+    inset: 100% 0 auto;
+    height: 32px;
+    background: inherit;
+    -webkit-backdrop-filter: inherit;
+    backdrop-filter: inherit;
+  }
+  .bottom-sheet[data-dragging="true"] {
+    transition: none;
+  }
+  .bottom-sheet[data-state="open"] {
+    animation: bottom-sheet-in 520ms
+      linear(
+        0,
+        0.002,
+        0.011 1.5%,
+        0.04 3%,
+        0.092 4.6%,
+        0.17 6.3%,
+        0.27 8.1%,
+        0.386 10%,
+        0.512 12%,
+        0.638 14.1%,
+        0.756 16.3%,
+        0.859 18.6%,
+        0.94 21%,
+        0.995 23.5%,
+        1.012 26.2%,
+        1.011 29%,
+        1.006 32%,
+        1.002 35.2%,
+        1 38.6%,
+        0.999 42.2%,
+        1
+      );
+  }
+  .bottom-sheet[data-state="closed"] {
+    animation: bottom-sheet-out 260ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+  .bottom-sheet-drag-zone {
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .bottom-sheet {
+      background: var(--card);
+    }
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    .bottom-sheet {
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+      background: var(--card);
+    }
+  }
+  /* Sem mola nem deslize: o sheet aparece e some direto. */
+  @media (prefers-reduced-motion: reduce) {
+    .bottom-sheet,
+    .bottom-sheet-scrim {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+}
+
+@keyframes bottom-sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes bottom-sheet-out {
+  from {
+    transform: translateY(var(--bs-drag, 0px));
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+@keyframes bottom-sheet-scrim-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes bottom-sheet-scrim-out {
+  from {
+    opacity: var(--bs-scrim, 1);
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* O Dialog modal do Radix põe `pointer-events: none` no body e o sonner não
+ * reativa o toast: sem isto o toque em "Desfazer" atravessa para o scrim.
+ * Só abaixo de `lg`, onde o bottom sheet existe. */
+@media (max-width: 1023.98px) {
+  [data-sonner-toast] {
+    pointer-events: auto;
+  }
+}
+/* ==== END bottom-sheet: regras ==== */
+
+/* ==== BEGIN transactions-mobile ====
+ * Lista de transações abaixo de `md`: barra de busca fixa e cabeçalho do dia
+ * logo abaixo dela. As alturas são fixas para o `top` do sticky ser conhecido
+ * em CSS (sem medir). Nada aqui usa `backdrop-filter`. */
+@layer components {
+  .tx-mobile {
+    --tx-topbar: calc(3.5rem + env(safe-area-inset-top));
+    --tx-toolbar-h: 6.25rem;
+  }
+
+  /* Estende o elemento até as bordas da tela, anulando o padding do `<main>`. */
+  .bleed-x {
+    margin-left: calc(-1 * max(1rem, env(safe-area-inset-left)));
+    margin-right: calc(-1 * max(1rem, env(safe-area-inset-right)));
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+  @media (min-width: 40rem) {
+    .bleed-x {
+      margin-left: calc(-1 * max(1.5rem, env(safe-area-inset-left)));
+      margin-right: calc(-1 * max(1.5rem, env(safe-area-inset-right)));
+      padding-left: max(1.5rem, env(safe-area-inset-left));
+      padding-right: max(1.5rem, env(safe-area-inset-right));
+    }
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+/* ==== END transactions-mobile ==== */
+
+/* ==== budget-range ==== */
+/*
+ * Slider das metas: trilho no token neutro e preenchimento na cor do grupo
+ * (dado do usuário, vem em `--range-color`); `--range-fill` é o percentual.
+ */
+@layer components {
+  .budget-range {
+    appearance: none;
+    height: 1rem;
+    background: transparent;
+    cursor: pointer;
+  }
+  .budget-range::-webkit-slider-runnable-track {
+    height: 0.375rem;
+    border-radius: 9999px;
+    background: linear-gradient(
+      to right,
+      var(--range-color) var(--range-fill),
+      var(--muted) var(--range-fill)
+    );
+  }
+  .budget-range::-moz-range-track {
+    height: 0.375rem;
+    border-radius: 9999px;
+    background: var(--muted);
+  }
+  .budget-range::-moz-range-progress {
+    height: 0.375rem;
+    border-radius: 9999px;
+    background: var(--range-color);
+  }
+  .budget-range::-webkit-slider-thumb {
+    appearance: none;
+    width: 1rem;
+    height: 1rem;
+    margin-top: -0.3125rem;
+    border-radius: 9999px;
+    border: 2px solid var(--range-color);
+    background: var(--background);
+  }
+  .budget-range::-moz-range-thumb {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 9999px;
+    border: 2px solid var(--range-color);
+    background: var(--background);
+  }
+  .budget-range:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 9999px;
+  }
+}
+/* ==== END budget-range ==== */

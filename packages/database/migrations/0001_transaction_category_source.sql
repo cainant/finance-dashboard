@@ -1,0 +1,1 @@
+ALTER TABLE `transactions` ADD `category_source` text DEFAULT 'provider' NOT NULL;

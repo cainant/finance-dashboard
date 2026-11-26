@@ -1,0 +1,586 @@
+#!/usr/bin/env node
+/* agent-cli — respostas do repositório num lugar só. Sem dependências. `agent-cli --help`. */
+"use strict";
+process.noDeprecation = true;
+const fs = require("node:fs");
+const path = require("node:path");
+const cp = require("node:child_process");
+
+const ROOT = path.resolve(__dirname, "..");
+const API = path.join(ROOT, "apps", "api");
+const strip = (s) => String(s).replace(/\x1b\[[0-9;]*[A-Za-z]/g, "");
+const isWin = process.platform === "win32";
+const BOOL_FLAGS = ["json", "help", "remote", "kill", "open", "allow-write"];
+
+function loadDeployEnv() {
+  const vars = {};
+  const f = path.join(API, ".env.deploy");
+  if (fs.existsSync(f)) {
+    for (const rawLine of fs.readFileSync(f, "utf8").split(/\r?\n/)) {
+      const line = rawLine.trim();
+      if (!line || line.startsWith("#")) continue;
+      const m = line.match(/^([A-Z0-9_]+)\s*=\s*(.*)$/);
+      if (m) vars[m[1]] = m[2].trim().replace(/^["']|["']$/g, "");
+    }
+  }
+  return {
+    PROD_URL: process.env.PROD_URL?.trim() || vars.PROD_URL || "",
+    CLOUDFLARE_D1_DATABASE_ID:
+      process.env.CLOUDFLARE_D1_DATABASE_ID?.trim() || vars.CLOUDFLARE_D1_DATABASE_ID || "",
+    CLOUDFLARE_KV_NAMESPACE_ID:
+      process.env.CLOUDFLARE_KV_NAMESPACE_ID?.trim() || vars.CLOUDFLARE_KV_NAMESPACE_ID || "",
+  };
+}
+
+function parseArgs(argv) {
+  const flags = {};
+  const rest = [];
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    if (a.startsWith("--")) {
+      const [k, v] = a.slice(2).split("=");
+      if (v !== undefined) flags[k] = v;
+      else if (BOOL_FLAGS.includes(k)) flags[k] = true;
+      else flags[k] = argv[++i] ?? true;
+    } else rest.push(a);
+  }
+  return { flags, rest };
+}
+
+let JSON_OUT = false;
+function emit(data, lines) {
+  if (JSON_OUT) console.log(JSON.stringify(data));
+  else console.log((Array.isArray(lines) ? lines : [String(lines)]).join("\n"));
+}
+
+function run(cmd, args, opts = {}) {
+  const r = cp.spawnSync(cmd, args, {
+    cwd: opts.cwd ?? ROOT,
+    encoding: "utf8",
+    shell: isWin && cmd === "pnpm",
+    maxBuffer: 64 * 1024 * 1024,
+    env: {
+      ...process.env,
+      NODE_NO_WARNINGS: "1",
+      FORCE_COLOR: "0",
+      NO_COLOR: "1",
+      ...(opts.env ?? {}),
+    },
+  });
+  return { code: r.status ?? 1, out: strip((r.stdout ?? "") + (r.stderr ?? "")) };
+}
+
+function wranglerProd() {
+  const text = fs.readFileSync(path.join(API, "wrangler.jsonc"), "utf8");
+  const json = JSON.parse(text.replace(/^\s*\/\/.*$/gm, "").replace(/,(\s*[}\]])/g, "$1"));
+  return json.env?.production ?? {};
+}
+
+// ---------------------------------------------------------------- facts
+const FACTS_HELP = `facts — fatos fixos do projeto (produção, ids, portas, comandos, docs).
+uso: agent-cli facts [--json]`;
+function cmdFacts() {
+  const p = wranglerProd();
+  const deployEnv = loadDeployEnv();
+  const f = {
+    prodUrl: deployEnv.PROD_URL || "(defina PROD_URL ou apps/api/.env.deploy)",
+    worker: p.name,
+    d1: deployEnv.CLOUDFLARE_D1_DATABASE_ID || p.d1_databases?.[0]?.database_id,
+    kv: deployEnv.CLOUDFLARE_KV_NAMESPACE_ID || p.kv_namespaces?.[0]?.id,
+    cron: p.triggers?.crons,
+    vars: p.vars,
+    ports: {
+      api: 8787,
+      web: 5173,
+      note: "worktrees usam .wt.env; e2e lê E2E_API_PORT/E2E_WEB_PORT",
+    },
+    login: "prod = GitHub OAuth (allowlist); senha só dev/test",
+    pluggy: "app 'Lumen Finance'; MeuPluggy conector 200; sandbox conector 2 (user-ok/password-ok)",
+    cost: "zero: só free tiers (sem Workers Paid/Queues/R2/cartão)",
+    docs: {
+      architecture: "docs/architecture.md",
+      deploy: "docs/deploy.md",
+      openFinance: "docs/open-finance.md",
+      env: "docs/environment-variables.md",
+    },
+    commands: {
+      verify: "agent-cli verify",
+      deploy: "pnpm deploy:prod (só o dono; threads não fazem deploy)",
+      smokeProd: "agent-cli smoke prod",
+      smokePluggy: "agent-cli smoke pluggy",
+    },
+  };
+  emit(f, [
+    `prod      ${f.prodUrl}  worker=${f.worker}`,
+    `d1        ${f.d1}`,
+    `kv        ${f.kv}`,
+    `cron      ${(f.cron ?? []).join(", ")}`,
+    `vars      ${JSON.stringify(f.vars)}`,
+    `ports     api ${f.ports.api} · web ${f.ports.web} (${f.ports.note})`,
+    `login     ${f.login}`,
+    `pluggy    ${f.pluggy}`,
+    `custo     ${f.cost}`,
+    `docs      ${Object.values(f.docs).join(" · ")}`,
+    `comandos  ${Object.values(f.commands).join(" | ")}`,
+  ]);
+}
+
+// ---------------------------------------------------------------- ports
+const PORTS_HELP = `ports — quem escuta nas portas de dev (8787 API, 5173 web ou as dadas).
+uso: agent-cli ports [porta ...] [--kill] [--json]
+  --kill  encerra só processos wrangler/workerd/vite/node que seguram a porta`;
+function listeners(port) {
+  if (isWin) {
+    const r = run("netstat", ["-ano", "-p", "TCP"]);
+    return [
+      ...new Set(
+        r.out
+          .split(/\r?\n/)
+          .filter((l) => /LISTENING/.test(l) && new RegExp(":" + port + "\s").test(l))
+          .map((l) => l.trim().split(/\s+/).pop()),
+      ),
+    ];
+  }
+  const r = run("lsof", ["-ti", "tcp:" + port, "-sTCP:LISTEN"]);
+  return r.out.split(/\s+/).filter((x) => /^\d+$/.test(x));
+}
+
+function procInfo(pid) {
+  if (!isWin) return { name: run("ps", ["-o", "comm=", "-p", pid]).out.trim(), parent: null };
+  const r = run("powershell", [
+    "-NoProfile",
+    "-Command",
+    "$p = Get-CimInstance Win32_Process -Filter 'ProcessId=" +
+      pid +
+      "'; if ($p) { $p.ParentProcessId.ToString() + '|' + $p.Name + ' ' + $p.CommandLine }",
+  ]);
+  const [parent, ...name] = r.out.trim().split("|");
+  return { name: name.join("|").slice(0, 120), parent: /^\d+$/.test(parent) ? parent : null };
+}
+
+function killTree(pid) {
+  return isWin
+    ? run("taskkill", ["/PID", pid, "/T", "/F"]).code === 0
+    : run("kill", ["-9", pid]).code === 0;
+}
+
+function cmdPorts(rest, flags) {
+  const ports = (rest.length ? rest : ["8787", "5173"]).map(Number);
+  const found = [];
+  const seen = new Set();
+  for (let pass = 0; pass < (flags.kill ? 5 : 1); pass++) {
+    let any = false;
+    for (const port of ports) {
+      for (const pid of listeners(port)) {
+        any = true;
+        const info = procInfo(pid);
+        const ours = /wrangler|workerd|miniflare|vite|node/i.test(info.name);
+        let killed = false;
+        if (flags.kill && ours) {
+          // o wrangler dev respawna o workerd: derruba o pai (wrangler/vite) junto
+          if (info.parent) {
+            const pinfo = procInfo(info.parent);
+            if (/wrangler|vite/i.test(pinfo.name)) killTree(info.parent);
+          }
+          killed = killTree(pid);
+        }
+        const key = port + ":" + pid;
+        if (!seen.has(key)) {
+          seen.add(key);
+          found.push({ port, pid: Number(pid), name: info.name, killed });
+        }
+      }
+    }
+    if (!flags.kill || !any) break;
+    cp.spawnSync(process.execPath, ["-e", "setTimeout(()=>{},800)"]);
+  }
+  const still = flags.kill ? ports.filter((p) => listeners(p).length) : [];
+  emit(
+    { listeners: found, stillBusy: still },
+    found.length
+      ? [
+          ...found.map(
+            (x) => x.port + " pid=" + x.pid + (x.killed ? " KILLED" : "") + " " + x.name,
+          ),
+          ...(still.length ? ["ainda ocupadas: " + still.join(", ")] : []),
+        ]
+      : ["livres: " + ports.join(", ")],
+  );
+}
+
+// ---------------------------------------------------------------- prs
+const PRS_HELP = `prs — PRs recentes (número, estado, título).
+uso: agent-cli prs [--limit 10] [--open] [--json]`;
+function cmdPrs(_r, flags) {
+  const args = [
+    "pr",
+    "list",
+    "--state",
+    flags.open ? "open" : "all",
+    "--limit",
+    String(flags.limit ?? 10),
+    "--json",
+    "number,title,state,mergedAt,headRefName",
+  ];
+  const r = run("gh", args);
+  if (r.code !== 0) return fail(r.out);
+  const prs = JSON.parse(r.out);
+  emit(
+    prs,
+    prs.length ? prs.map((p) => `#${p.number} ${p.state.padEnd(6)} ${p.title}`) : ["nenhum PR"],
+  );
+}
+
+// ---------------------------------------------------------------- sync
+const SYNC_HELP = `sync — git pull --ff-only + pnpm install --frozen-lockfile.
+uso: agent-cli sync [--json]`;
+function cmdSync() {
+  const a = run("git", ["pull", "--ff-only", "-q"]);
+  const b = a.code === 0 ? run("pnpm", ["install", "--frozen-lockfile"]) : null;
+  const ok = a.code === 0 && b?.code === 0;
+  emit({ ok, pull: a.out.trim(), install: b?.out.trim().split("\n").pop() ?? null }, [
+    ok ? "ok" : "FALHOU",
+    a.out.trim(),
+    b ? b.out.trim().split("\n").pop() : "",
+  ]);
+  if (!ok) process.exitCode = 1;
+}
+
+// ---------------------------------------------------------------- verify
+const STEPS = {
+  format: "format:check",
+  lint: "lint",
+  typecheck: "typecheck",
+  test: "test",
+  build: "build",
+  e2e: "test:e2e",
+};
+const VERIFY_HELP = `verify — mesmos checks do CI, uma linha por etapa; só a falha mostra o fim do log.
+uso: agent-cli verify [--only format,lint,typecheck,test,build,e2e] [--pkg api|web|contracts|...] [--json]
+  padrão: format lint typecheck test build (e2e só com --only e2e)
+  --pkg   roda lint/typecheck/test/build só desse pacote (@fd/<pkg>)`;
+function cmdVerify(_r, flags) {
+  const only = flags.only
+    ? String(flags.only).split(",")
+    : ["format", "lint", "typecheck", "test", "build"];
+  const results = [];
+  for (const name of only) {
+    const script = STEPS[name];
+    if (!script) return fail(`etapa desconhecida: ${name}`);
+    const args =
+      flags.pkg && ["lint", "typecheck", "test", "build"].includes(name)
+        ? ["--filter", `@fd/${flags.pkg}`, "run", script]
+        : ["run", script];
+    const t0 = Date.now();
+    const r = run("pnpm", args);
+    const tail = r.out.trim().split("\n").slice(-25).join("\n");
+    results.push({
+      step: name,
+      ok: r.code === 0,
+      seconds: Math.round((Date.now() - t0) / 1000),
+      tail: r.code === 0 ? undefined : tail,
+    });
+    if (r.code !== 0) break;
+  }
+  const ok = results.every((x) => x.ok);
+  emit(
+    { ok, results },
+    results.map(
+      (x) => `${x.ok ? "PASS" : "FAIL"} ${x.step} (${x.seconds}s)${x.tail ? "\n" + x.tail : ""}`,
+    ),
+  );
+  if (!ok) process.exitCode = 1;
+}
+
+// ---------------------------------------------------------------- d1
+const D1_HELP = `d1 — roda SQL no D1 (local por padrão; --remote = produção).
+uso: agent-cli d1 "<sql>" [--remote] [--allow-write] [--json]
+  ex.: agent-cli d1 "select count(*) n from transactions" --remote
+  escrita em produção (insert/update/delete/drop/alter) exige --allow-write`;
+function cmdD1(rest, flags) {
+  const sql = rest.join(" ");
+  if (!sql) return fail("informe o SQL");
+  if (
+    flags.remote &&
+    /^\s*(drop|delete|update|insert|alter|truncate)/i.test(sql) &&
+    !flags["allow-write"]
+  )
+    return fail("escrita em produção exige --allow-write");
+  const r = flags.remote
+    ? run(
+        process.execPath,
+        [
+          "scripts/with-prod-wrangler.mjs",
+          "d1",
+          "execute",
+          "DB",
+          "--remote",
+          "--env",
+          "production",
+          "--json",
+          "--command",
+          sql,
+        ],
+        { cwd: API },
+      )
+    : run(
+        "pnpm",
+        [
+          "exec",
+          "wrangler",
+          "d1",
+          "execute",
+          "DB",
+          "--local",
+          "--json",
+          "--command",
+          JSON.stringify(sql),
+        ],
+        { cwd: API },
+      );
+  const m = r.out.match(/\[\s*\{[\s\S]*\}\s*\]\s*$/);
+  if (!m) return fail(r.out.trim().split("\n").slice(-8).join("\n"));
+  const rows = JSON.parse(m[0])[0]?.results ?? [];
+  emit({ rows }, rows.length ? rows.map((x) => JSON.stringify(x)) : ["0 linhas"]);
+}
+
+// ---------------------------------------------------------------- cf
+const CF_HELP = `cf — GET na API da Cloudflare com o login do wrangler (o token nunca é impresso).
+uso: agent-cli cf <caminho> [--json]
+  ex.: agent-cli cf zones   agent-cli cf accounts   (sem "/" inicial: o Git Bash o converte em caminho do Windows)`;
+async function cmdCf(rest) {
+  const p = rest[0];
+  if (!p) return fail("informe o caminho, ex.: zones");
+  const home = process.env.USERPROFILE ?? process.env.HOME ?? "";
+  const files = [
+    path.join(process.env.APPDATA ?? "", "xdg.config", ".wrangler", "config", "default.toml"),
+    path.join(home, ".wrangler", "config", "default.toml"),
+    path.join(home, ".config", ".wrangler", "config", "default.toml"),
+  ];
+  let token = null;
+  for (const f of files) {
+    if (!fs.existsSync(f)) continue;
+    const m = fs.readFileSync(f, "utf8").match(/^oauth_token\s*=\s*"([^"]+)"/m);
+    if (m) {
+      token = m[1];
+      break;
+    }
+  }
+  if (!token) return fail("sem login do wrangler: rode `pnpm exec wrangler login`");
+  const res = await fetch(
+    `https://api.cloudflare.com/client/v4${p.startsWith("/") ? p : "/" + p}`,
+    {
+      headers: { authorization: `Bearer ${token}` },
+    },
+  );
+  const body = await res.json().catch(() => ({}));
+  const items = body.result ?? body;
+  emit({ status: res.status, success: body.success, result: items, errors: body.errors }, [
+    `HTTP ${res.status} success=${body.success}`,
+    JSON.stringify(body.errors?.length ? body.errors : items).slice(0, 4000),
+  ]);
+}
+
+// ---------------------------------------------------------------- smoke
+const SMOKE_HELP = `smoke — verificações contra serviços reais.
+uso: agent-cli smoke prod [--url https://...] [--json]
+       health 200 em production, login só GitHub, webhook sem segredo = 401,
+       /api/providers sem sessão = 401, CSP/HSTS presentes, HTML sem texto de demonstração.
+     agent-cli smoke pluggy [--expect-tx N] [--json]
+       cria item no sandbox oficial do Pluggy (conector 2) com PLUGGY_* de apps/api/.dev.vars,
+       confere contas/transações/investimentos e apaga o item.`;
+
+async function smokeProd(flags) {
+  const rawUrl = String(flags.url ?? loadDeployEnv().PROD_URL ?? "").trim();
+  if (!rawUrl) {
+    return fail("defina --url, PROD_URL no ambiente ou PROD_URL em apps/api/.env.deploy");
+  }
+  const base = rawUrl.replace(/\/$/, "");
+  const checks = [];
+  const add = (name, ok, detail = "") => checks.push({ name, ok: Boolean(ok), detail });
+  const get = (p, init) => fetch(base + p, { redirect: "manual", ...init });
+  try {
+    const h = await get("/api/health");
+    const hb = await h.json().catch(() => ({}));
+    add(
+      "health 200 production",
+      h.status === 200 && hb.env === "production",
+      `${h.status} ${JSON.stringify(hb)}`,
+    );
+    const pr = await get("/api/auth/providers");
+    const pb = await pr.json().catch(() => ({}));
+    add(
+      "login: github on, senha off, sem setup",
+      pb.github?.enabled === true && pb.password?.enabled === false && pb.setupRequired === false,
+      JSON.stringify(pb),
+    );
+    const wh = await get("/api/webhooks/pluggy", {
+      method: "POST",
+      body: "{}",
+      headers: { "content-type": "application/json" },
+    });
+    add("webhook sem segredo = 401", wh.status === 401, String(wh.status));
+    const pv = await get("/api/providers");
+    add("providers sem sessão = 401", pv.status === 401, String(pv.status));
+    const page = await get("/login");
+    const html = await page.text();
+    const csp = page.headers.get("content-security-policy") ?? "";
+    add(
+      "CSP com cdn.pluggy.ai e cloudflareinsights",
+      csp.includes("cdn.pluggy.ai") && csp.includes("cloudflareinsights.com"),
+      csp ? "ok" : "ausente",
+    );
+    add("HSTS", Boolean(page.headers.get("strict-transport-security")));
+    add("HTML sem 'demonstra'", !/demonstra/i.test(html));
+  } catch (e) {
+    add("rede", false, String(e));
+  }
+  report(checks);
+}
+
+async function smokePluggy(flags) {
+  const vars = {};
+  const f = path.join(API, ".dev.vars");
+  if (!fs.existsSync(f)) return fail("apps/api/.dev.vars ausente (PLUGGY_CLIENT_ID/SECRET)");
+  for (const l of fs.readFileSync(f, "utf8").split("\n")) {
+    const m = l.match(/^([A-Z_]+)=(.*)$/);
+    if (m) vars[m[1]] = m[2].trim();
+  }
+  if (!vars.PLUGGY_CLIENT_ID || !vars.PLUGGY_CLIENT_SECRET)
+    return fail("PLUGGY_CLIENT_ID/SECRET vazios em .dev.vars");
+  const B = "https://api.pluggy.ai";
+  const checks = [];
+  const add = (name, ok, detail = "") => checks.push({ name, ok: Boolean(ok), detail });
+  let key;
+  let itemId;
+  const api = async (m, p, body) => {
+    const r = await fetch(B + p, {
+      method: m,
+      headers: { "content-type": "application/json", ...(key ? { "x-api-key": key } : {}) },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    return { status: r.status, body: await r.json().catch(() => ({})) };
+  };
+  try {
+    const a = await api("POST", "/auth", {
+      clientId: vars.PLUGGY_CLIENT_ID,
+      clientSecret: vars.PLUGGY_CLIENT_SECRET,
+    });
+    key = a.body.apiKey;
+    add("auth", a.status === 200 && key, String(a.status));
+    if (key) {
+      const it = await api("POST", "/items", {
+        connectorId: 2,
+        parameters: { user: "user-ok", password: "password-ok" },
+      });
+      itemId = it.body.id;
+      add("cria item sandbox", it.status === 200 || it.status === 201, String(it.status));
+      let status = it.body.status;
+      for (
+        let i = 0;
+        i < 40 && itemId && status !== "UPDATED" && !/ERROR/.test(status ?? "");
+        i++
+      ) {
+        await new Promise((r) => setTimeout(r, 3000));
+        status = (await api("GET", `/items/${itemId}`)).body.status;
+      }
+      add("item UPDATED", status === "UPDATED", String(status));
+      const acc = (await api("GET", `/accounts?itemId=${itemId}`)).body.results ?? [];
+      add("contas > 0", acc.length > 0, `${acc.length}`);
+      let total = 0;
+      const credit = { neg: 0, pos: 0 };
+      for (const acct of acc) {
+        const to = new Date().toISOString().slice(0, 10);
+        let after = null;
+        for (let n = 0; n < 50; n++) {
+          const q = `/v2/transactions?accountId=${acct.id}&dateFrom=2000-01-01&dateTo=${to}${after ? "&after=" + encodeURIComponent(after) : ""}`;
+          const t = (await api("GET", q)).body;
+          const list = t.results ?? [];
+          total += list.length;
+          if (acct.type === "CREDIT")
+            for (const x of list) x.amount < 0 ? credit.neg++ : credit.pos++;
+          after = t.next ? new URL(t.next, B).searchParams.get("after") : null;
+          if (!after) break;
+        }
+      }
+      add(
+        "transações",
+        flags["expect-tx"] ? total === Number(flags["expect-tx"]) : total > 0,
+        `${total}`,
+      );
+      add(
+        "cartão: sinal consistente (convenção por conector)",
+        credit.neg === 0 || credit.pos === 0,
+        `neg=${credit.neg} pos=${credit.pos}`,
+      );
+      const inv = await api("GET", `/investments?itemId=${itemId}`);
+      add("investimentos", inv.status === 200, `${(inv.body.results ?? []).length}`);
+    }
+  } catch (e) {
+    add("erro", false, String(e));
+  } finally {
+    if (itemId && key) await api("DELETE", `/items/${itemId}`).catch(() => {});
+  }
+  report(checks);
+}
+
+function report(checks) {
+  const ok = checks.every((c) => c.ok);
+  emit({ ok, checks }, [
+    ...checks.map(
+      (c) =>
+        `${c.ok ? "PASS" : "FAIL"} ${c.name}${c.detail ? "  " + String(c.detail).slice(0, 160) : ""}`,
+    ),
+    ok ? "OK" : "FALHOU",
+  ]);
+  if (!ok) process.exitCode = 1;
+}
+
+function fail(msg) {
+  console.error(JSON_OUT ? JSON.stringify({ error: msg }) : `erro: ${msg}`);
+  process.exitCode = 1;
+}
+
+// ---------------------------------------------------------------- main
+const COMMANDS = {
+  facts: [FACTS_HELP, cmdFacts],
+  ports: [PORTS_HELP, cmdPorts],
+  prs: [PRS_HELP, cmdPrs],
+  sync: [SYNC_HELP, cmdSync],
+  verify: [VERIFY_HELP, cmdVerify],
+  d1: [D1_HELP, cmdD1],
+  cf: [CF_HELP, cmdCf],
+  smoke: [
+    SMOKE_HELP,
+    (rest, flags) =>
+      rest[0] === "prod"
+        ? smokeProd(flags)
+        : rest[0] === "pluggy"
+          ? smokePluggy(flags)
+          : fail("smoke prod | smoke pluggy"),
+  ],
+};
+
+(async () => {
+  const { flags, rest } = parseArgs(process.argv.slice(2));
+  JSON_OUT = Boolean(flags.json);
+  const [name, ...args] = rest;
+  if (!name || !COMMANDS[name]) {
+    if (name) console.error(`comando desconhecido: ${name}`);
+    console.log(
+      [
+        "agent-cli — perguntas do repo respondidas num lugar só (--json em todos).",
+        "",
+        ...Object.entries(COMMANDS).map(
+          ([k, [h]]) => `  ${k.padEnd(7)} ${h.split("\n")[0].replace(/^\S+ — /, "")}`,
+        ),
+        "",
+        "agent-cli <comando> --help para detalhes.",
+      ].join("\n"),
+    );
+    process.exitCode = name ? 1 : 0;
+    return;
+  }
+  if (flags.help) return console.log(COMMANDS[name][0]);
+  await COMMANDS[name][1](args, flags);
+})();

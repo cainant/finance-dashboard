@@ -1,0 +1,63 @@
+{
+  "total": 2,
+  "totalPages": 1,
+  "page": 1,
+  "results": [
+    {
+      "id": "b1a2c3d4-0001-4a5b-8c9d-000000000001",
+      "type": "BANK",
+      "subtype": "CHECKING_ACCOUNT",
+      "number": "0001/12345-0",
+      "name": "Conta Corrente",
+      "marketingName": "Conta Digital Exemplo",
+      "balance": 21544.6,
+      "itemId": "item-sandbox-001",
+      "owner": "Titular de Teste",
+      "currencyCode": "BRL",
+      "bankData": {
+        "transferNumber": "123/0001/12345-0",
+        "closingBalance": 21544.6,
+        "automaticallyInvestedBalance": 0,
+        "overdraftContractedLimit": 5000,
+        "overdraftUsedLimit": 0,
+        "unarrangedOverdraftAmount": 0,
+        "hasReservedBalance": false,
+        "reservedBalances": []
+      },
+      "creditData": null,
+      "createdAt": "2026-01-15T13:21:08.456Z",
+      "updatedAt": "2026-11-10T12:00:05.000Z"
+    },
+    {
+      "id": "b1a2c3d4-0002-4a5b-8c9d-000000000002",
+      "type": "CREDIT",
+      "subtype": "CREDIT_CARD",
+      "number": "8842",
+      "name": "Cartão de Crédito",
+      "marketingName": "Cartão Black Exemplo",
+      "balance": 2450.75,
+      "itemId": "item-sandbox-001",
+      "owner": "Titular de Teste",
+      "currencyCode": "BRL",
+      "bankData": null,
+      "creditData": {
+        "level": "BLACK",
+        "brand": "MASTERCARD",
+        "brandAdditionalInfo": null,
+        "balanceCloseDate": "2026-11-05",
+        "balanceDueDate": "2026-11-12",
+        "availableCreditLimit": 12549.25,
+        "creditLimit": 15000,
+        "balanceForeignCurrency": 0,
+        "minimumPayment": 245.08,
+        "isLimitFlexible": false,
+        "status": "ACTIVE",
+        "holderType": "MAIN",
+        "disaggregatedCreditLimits": null,
+        "additionalCards": null
+      },
+      "createdAt": "2026-01-15T13:21:09.102Z",
+      "updatedAt": "2026-11-10T12:00:05.000Z"
+    }
+  ]
+}
